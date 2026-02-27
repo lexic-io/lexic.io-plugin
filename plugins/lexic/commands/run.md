@@ -24,16 +24,24 @@ Determine whether you are resuming an existing run or creating a new one:
 5. Record the run_id for all subsequent operations. Skip to Phase 1 Preflight.
 
 **If `$ARGUMENTS` is NOT a UUID** (it's a description or name):
-1. Call `workflow_run_create` with name set to `$ARGUMENTS`.
-2. Record the returned `run_id` — use it for ALL subsequent task operations.
-3. Read the prompt file or task spec (if the user provided one) to understand the work plan.
-4. Call `workflow_task_create` for each task in the work plan, with:
-   - Clear imperative titles
-   - Detailed descriptions with enough context for an agent to execute independently
-   - Acceptance criteria for each task
-   - `depends_on` relationships where tasks have ordering requirements
-   - `context_tags` to help assemble relevant knowledge
-5. Proceed to Phase 1 Preflight.
+1. Read the prompt file or task spec (if the user provided one) to understand the full work plan BEFORE creating any runs.
+2. **Detect multi-phase structure**: The work is multi-phase if the prompt has explicit phase groupings (e.g. "Phase 1 / Phase 2", "Task Dependency Graph" with phases, or tasks that must run strictly after other tasks complete — not just `depends_on` within a single run). Single-phase work is a flat list of tasks that can all live in one run.
+
+   **If single-phase** (all tasks go in one run):
+   - Call `workflow_run_create` with name set to `$ARGUMENTS`.
+   - Record the returned `run_id`.
+   - Call `workflow_task_create` for each task with clear imperative titles, detailed descriptions, acceptance criteria, `depends_on` relationships, and `context_tags`.
+   - Proceed to Phase 1 Preflight with this run_id.
+
+   **If multi-phase** (tasks are grouped into sequential phases):
+   - Create ALL phase runs upfront before executing any of them, grouped under a parent workflow.
+   - First: call `workflow_create` with the name and source_prompt of the overall work. Record the returned `workflow_id`.
+   - For Phase 1: call `workflow_run_create` with name `"[prompt name] — Phase 1: [phase description]"` and `workflow_id` set to the workflow_id from above. Record `run_id_phase1`.
+   - For Phase 2: call `workflow_run_create` with name `"[prompt name] — Phase 2: [phase description]"`, `workflow_id` set to the same workflow_id, and `depends_on_runs: [run_id_phase1]`. Record `run_id_phase2`.
+   - Repeat for each subsequent phase, each with the same `workflow_id` and depending on the previous run.
+   - Populate tasks into each run immediately after creating it: call `workflow_task_create` for that phase's tasks before moving on to creating the next phase run.
+   - Tell the user: "Created parent workflow [workflow_id] with [N] phase runs. Executing Phase 1 now — subsequent phases will unlock automatically when each phase completes."
+   - Proceed to Phase 1 Preflight with `run_id_phase1`.
 
 ## Phase 1: Preflight
 
