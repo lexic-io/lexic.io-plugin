@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "lexic",
-      "source": ".",
+      "source": "./plugins/lexic",
       "description": "AI-powered knowledge management and autonomous workflows for Claude Code"
     }
   ]
