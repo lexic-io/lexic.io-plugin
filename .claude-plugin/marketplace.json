@@ -1,0 +1,14 @@
+{
+  "name": "lexic-marketplace",
+  "owner": {
+    "name": "Lexic.io",
+    "url": "https://lexic.io"
+  },
+  "plugins": [
+    {
+      "name": "lexic",
+      "source": ".",
+      "description": "AI-powered knowledge management and autonomous workflows for Claude Code"
+    }
+  ]
+}

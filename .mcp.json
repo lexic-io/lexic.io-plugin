@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "lexic": {
+      "type": "http",
+      "url": "https://mcp.lexic.io/api/mcp"
+    }
+  }
+}
