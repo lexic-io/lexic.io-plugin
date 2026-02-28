@@ -65,6 +65,14 @@ The plugin includes two skills that teach Claude to use Lexic **proactively** wi
 
 4. The first time you use a Lexic command, you'll be prompted to sign in via your browser (Google, GitHub, or Microsoft). That's it — no API keys, no environment variables.
 
+5. Run setup in your project to configure `CLAUDE.md` with Lexic context instructions:
+
+```
+/Lexic:setup
+```
+
+This writes a Lexic integration block into your project's `CLAUDE.md` so Claude automatically loads prior context, captures decisions, and uses Lexic tools proactively. Safe to re-run — it only adds what's missing.
+
 ### Other Clients
 
 If you're not using Claude Code's plugin system, you can connect to the Lexic MCP server directly.
@@ -114,6 +122,11 @@ Use the `mcp-remote` bridge (requires Node.js):
 ```
 
 ## Quick Start
+
+**First time on a new project — run setup:**
+```
+/Lexic:setup
+```
 
 **Load context before working:**
 ```
@@ -227,7 +240,7 @@ Learn more at [lexic.io](https://lexic.io).
 
 ### 0.1.0 (Initial Release)
 
-- 8 slash commands: run, status, context, decide, save, search, learn, template
+- 13 slash commands: run, status, context, decide, save, search, learn, template, setup, start-session, session-recap, what-do-we-know, optimize-claude-md
 - Remote MCP server connection via Streamable HTTP
 - OAuth authentication (Google, GitHub, Microsoft)
 - Proactive knowledge skill for automatic context loading and decision capture
