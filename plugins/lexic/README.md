@@ -16,6 +16,11 @@ This plugin connects [Claude Code](https://code.claude.com) to [Lexic](https://l
 | `/Lexic:search` | Search across your notes, decisions, and development learnings |
 | `/Lexic:learn` | Record a learning that feeds into future autonomous run context |
 | `/Lexic:template` | Browse, create, and launch runs from reusable workflow templates |
+| `/Lexic:setup` | Configure CLAUDE.md with Lexic integration — safe to re-run, idempotent |
+| `/Lexic:start-session` | Load recent decisions, active workflows, and learnings at the start of a session |
+| `/Lexic:session-recap` | Summarize the session and store decisions + learnings to Lexic |
+| `/Lexic:what-do-we-know` | Deep retrieval of everything Lexic knows about a topic including gotchas |
+| `/Lexic:optimize-claude-md` | Analyze CLAUDE.md and suggest what to keep, move to Lexic, or remove |
 
 ### Integrated MCP Server
 
