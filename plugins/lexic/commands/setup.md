@@ -107,7 +107,77 @@ This project uses [Lexic](https://lexic.io) for persistent knowledge across codi
 {Placeholder for the user to fill in their project conventions}
 ```
 
-### 7. Store the setup event in Lexic
+### 7. Create .lexic/prompt-engineer.md
+
+Check if `.lexic/prompt-engineer.md` already exists.
+
+- **If it exists**: Leave it untouched. Do not overwrite user customizations.
+- **If it does not exist**: Create the `.lexic/` directory (if needed) and write this file:
+
+```markdown
+# Prompt Engineer — Project Customizations
+#
+# This file is read by /lexic:prompt-engineer to tailor prompt generation
+# to your specific codebase. It is NOT read by coding agents — it configures
+# the prompt engineering process itself.
+#
+# Add your project's mandatory guardrails, stack details, common patterns,
+# and conventions below. Each section is optional — delete or leave empty
+# any section that doesn't apply.
+#
+# To use: run /lexic:prompt-engineer "your feature description"
+# The prompt engineer will read this file automatically during Phase 0.
+
+## Stack
+#
+# Describe your tech stack so generated prompts reference the right tools.
+# Example:
+#   - Next.js 15, TypeScript, PostgreSQL
+#   - Python 3.12, FastAPI, SQLAlchemy
+
+## Mandatory Guardrails
+#
+# Rules that must appear in EVERY generated prompt. These are your project's
+# non-negotiable constraints.
+# Example:
+#   - Always check authentication before database writes
+#   - Never log PII to stdout
+#   - All database queries must use parameterized statements
+
+## Knowledge Tools
+#
+# If your project has MCP tools for querying prior decisions or storing
+# context, list them here so the prompt engineer uses them.
+# Example:
+#   - `dev_get_feature_context` — get decisions for a feature area
+#   - `knowledge_query` — search for prior decisions
+
+## Patterns to Watch For
+#
+# Common failure patterns specific to your codebase. The prompt engineer
+# checks for these during Phase 2 (scoping).
+# Example:
+#   - API handler exists but not registered in router
+#   - Migration references column that doesn't exist yet
+
+## Test Conventions
+#
+# Testing rules to include in generated prompts.
+# Example:
+#   - Use factories for test data, not raw SQL
+#   - Integration tests run against a test database
+
+## Output Conventions
+#
+# Where and how prompts should be saved, and any build checks to include.
+# Example:
+#   - Save prompts to `.claude/prompts/{feature-name}.md`
+#   - Build check: `npm run typecheck`
+```
+
+This file is intentionally blank (comments only) so it does nothing until the user adds their own rules. The comments are written for a human reader — they explain what each section does and show examples.
+
+### 8. Store the setup event in Lexic
 
 Call `knowledge_store` with:
 - **title**: "Project Setup: {project name}"
@@ -116,14 +186,14 @@ Call `knowledge_store` with:
 
 This creates a knowledge anchor so future sessions know when and how the project was configured.
 
-### 8. Verify the MCP connection
+### 9. Verify the MCP connection
 
 Call `knowledge_query` with the search term "setup" to verify the Lexic MCP tools are accessible and the lexicon is reachable.
 
 - **If successful**: Report success to the user
 - **If failed**: Report the error and suggest checking their MCP server configuration
 
-### 9. Report to the user
+### 10. Report to the user
 
 Print a summary:
 
@@ -134,15 +204,18 @@ Lexic setup complete.
   Lexicon: {lexicon_name}
   Stack:   {detected stack}
 
-  CLAUDE.md: {created / updated}
+  CLAUDE.md:                    {created / updated}
+  .lexic/prompt-engineer.md:    {created / already exists}
 
   Available commands:
-    /lexic:start-session     Load recent decisions + active context
-    /lexic:log-decision      Record an architectural decision
-    /lexic:what-do-we-know   Query everything Lexic knows about a topic
-    /lexic:session-recap      Summarize and store session learnings
-    /lexic:optimize-claude-md Analyze CLAUDE.md for improvement opportunities
+    /lexic:start-session       Load recent decisions + active context
+    /lexic:prompt-engineer     Generate implementation prompts from feature descriptions
+    /lexic:log-decision        Record an architectural decision
+    /lexic:what-do-we-know     Query everything Lexic knows about a topic
+    /lexic:session-recap       Summarize and store session learnings
+    /lexic:optimize-claude-md  Analyze CLAUDE.md for improvement opportunities
 
+  Customize prompt generation by editing .lexic/prompt-engineer.md
   The integration block in CLAUDE.md is marked with <!-- lexic:integration -->
   so it's safe to edit — just keep the markers intact for future updates.
 ```
