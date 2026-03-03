@@ -1,7 +1,7 @@
 {
   "name": "lexic",
   "description": "AI-powered knowledge management and autonomous workflows for Claude Code. Lexic enriches your coding sessions with persistent knowledge, architectural decisions, and task orchestration that learns from every run.",
-  "version": "0.1.0",
+  "version": "0.1.0.2",
   "author": {
     "name": "Lexic.io",
     "url": "https://lexic.io"
