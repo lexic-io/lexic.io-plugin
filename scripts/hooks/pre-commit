@@ -1,0 +1,26 @@
+#!/bin/bash
+# Auto-bump the revision (4th) component of the plugin version on each commit.
+# Version format: major.minor.patch.revision (e.g. 0.1.0.1 -> 0.1.0.2)
+
+PLUGIN_JSON="plugins/lexic/.claude-plugin/plugin.json"
+
+# Only bump if the file exists
+if [ ! -f "$PLUGIN_JSON" ]; then
+  exit 0
+fi
+
+# Read current version
+CURRENT=$(grep -oP '"version":\s*"\K[^"]+' "$PLUGIN_JSON")
+
+# Split into parts
+IFS='.' read -r MAJOR MINOR PATCH REVISION <<< "$CURRENT"
+REVISION=${REVISION:-0}
+
+# Increment revision
+NEW_VERSION="$MAJOR.$MINOR.$PATCH.$((REVISION + 1))"
+
+# Update the file
+sed -i "s/\"version\": \"$CURRENT\"/\"version\": \"$NEW_VERSION\"/" "$PLUGIN_JSON"
+
+# Stage the version change so it's included in the commit
+git add "$PLUGIN_JSON"
