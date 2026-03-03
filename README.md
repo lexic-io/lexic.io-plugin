@@ -17,6 +17,16 @@ The **lexic** plugin gives Claude Code persistent knowledge management, architec
 
 See the [full plugin README](./plugins/lexic/README.md) for details on commands, skills, alternative client configs, and troubleshooting.
 
+## Development
+
+After cloning, install the git hooks:
+
+```
+bash scripts/setup-hooks.sh
+```
+
+This sets up auto version bumping on each commit.
+
 ## License
 
 MIT
