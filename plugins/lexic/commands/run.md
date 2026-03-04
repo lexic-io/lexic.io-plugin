@@ -7,7 +7,19 @@ argument-hint: "run name or existing run-id"
 
 You are executing an autonomous coding run managed by Lexic. Follow this protocol exactly.
 
+## Workflow Link
+
+Whenever you have a `run_id`, construct the workflow link as:
+
+```
+https://app.lexic.io/lexicon/{lexicon_id}/workflows/{run_id}
+```
+
+To get the `lexicon_id`, call `project_get_info` once at the start and record it. Include this link in all user-facing output that references a run.
+
 ## Phase 0: Run Setup
+
+Call `project_get_info` and record the `lexicon_id` for constructing workflow links.
 
 Determine whether you are resuming an existing run or creating a new one:
 
@@ -30,6 +42,7 @@ Determine whether you are resuming an existing run or creating a new one:
    **If single-phase** (all tasks go in one run):
    - Call `workflow_run_create` with name set to `$ARGUMENTS`.
    - Record the returned `run_id`.
+   - Print the workflow link: `View run: https://app.lexic.io/lexicon/{lexicon_id}/workflows/{run_id}`
    - Call `workflow_task_create` for each task with clear imperative titles, detailed descriptions, acceptance criteria, `depends_on` relationships, and `context_tags`.
    - Proceed to Phase 1 Preflight with this run_id.
 
@@ -41,6 +54,7 @@ Determine whether you are resuming an existing run or creating a new one:
    - Repeat for each subsequent phase, each with the same `workflow_id` and depending on the previous run.
    - Populate tasks into each run immediately after creating it: call `workflow_task_create` for that phase's tasks before moving on to creating the next phase run.
    - Tell the user: "Created parent workflow [workflow_id] with [N] phase runs. Executing Phase 1 now — subsequent phases will unlock automatically when each phase completes."
+   - Print the workflow link for Phase 1: `View run: https://app.lexic.io/lexicon/{lexicon_id}/workflows/{run_id_phase1}`
    - Proceed to Phase 1 Preflight with `run_id_phase1`.
 
 ## Phase 1: Preflight
@@ -118,6 +132,7 @@ When `workflow_task_next` returns no task:
    - Tasks completed vs failed
    - Total credits consumed
    - Key learnings captured across the run
+   - Workflow link: `View run: https://app.lexic.io/lexicon/{lexicon_id}/workflows/{run_id}`
 4. If any tasks failed, list them with their error summaries.
 
 ## Learning Quality Rules
