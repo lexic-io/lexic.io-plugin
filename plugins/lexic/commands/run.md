@@ -40,10 +40,9 @@ Determine whether you are resuming an existing run or creating a new one:
 2. **Detect multi-phase structure**: The work is multi-phase if the prompt has explicit phase groupings (e.g. "Phase 1 / Phase 2", "Task Dependency Graph" with phases, or tasks that must run strictly after other tasks complete — not just `depends_on` within a single run). Single-phase work is a flat list of tasks that can all live in one run.
 
    **If single-phase** (all tasks go in one run):
-   - Call `workflow_run_create` with name set to `$ARGUMENTS`.
+   - Call `workflow_execute` with `goal` set to `$ARGUMENTS` and `source_prompt` set to the full prompt/spec text (up to 50KB). This is the preferred path — it handles task decomposition, dependency wiring, and cost estimation automatically.
    - Record the returned `run_id`.
    - Print the workflow link: `View run: https://app.lexic.io/lexicon/{lexicon_id}/workflows/{run_id}`
-   - Call `workflow_task_create` for each task with clear imperative titles, detailed descriptions, acceptance criteria, `depends_on` relationships, and `context_tags`.
    - Proceed to Phase 1 Preflight with this run_id.
 
    **If multi-phase** (tasks are grouped into sequential phases):
