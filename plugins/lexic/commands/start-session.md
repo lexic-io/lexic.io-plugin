@@ -48,6 +48,7 @@ Active workflows:
 
 Call `knowledge_query` with:
 - **query**: the user's topic argument, or "recent learnings gotchas"
+- **include_learnings**: true
 - **limit**: 5
 
 Present gotchas and learnings separately from decisions:

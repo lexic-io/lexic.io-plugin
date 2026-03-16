@@ -65,7 +65,7 @@ This project uses [Lexic](https://lexic.io) for persistent knowledge across codi
 **Stack:** {detected stack summary, e.g. "Next.js 15, TypeScript, Supabase, PostgreSQL"}
 
 ### Before implementing any feature or fix:
-- Query Lexic for prior decisions: `knowledge_query` with relevant topic keywords
+- Query Lexic for prior context: `knowledge_query` with `include_learnings: true` and general operational terms (e.g., "bulk database operations", "API payload limits") rather than specific table/feature names — this surfaces universal patterns that apply broadly
 - If conflicting decisions exist, surface them before proceeding
 
 ### After making significant decisions:
@@ -76,9 +76,9 @@ This project uses [Lexic](https://lexic.io) for persistent knowledge across codi
 - Store as a learning: `workflow_learning_create` with category and context tags
 - Examples: framework quirks, deployment constraints, API rate limits, schema gotchas
 
-### Session workflow (optional):
-- Start: `/lexic:start-session` to load recent context
-- End: `/lexic:session-recap` to capture what was done
+### Session workflow:
+- **Always start sessions** with `/lexic:start-session` to load recent decisions, active workflows, and learnings before doing any work
+- End sessions with `/lexic:session-recap` to capture what was done
 <!-- /lexic:integration -->
 ```
 
