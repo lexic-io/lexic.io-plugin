@@ -31,6 +31,7 @@ The plugin automatically connects to Lexic's hosted MCP server, giving Claude ac
 - **Autonomous workflows** — Create, execute, and monitor multi-task coding runs with context assembly
 - **Development learnings** — Insights captured from autonomous runs, surfaced when relevant to future work
 - **Workflow templates** — Reusable blueprints created from successful runs
+- **Code graph** — Query pre-indexed code structure: find functions/classes by name, trace call chains, explore module hierarchies
 
 ### Proactive Skills
 

@@ -51,6 +51,19 @@ If the user asks about prior decisions, how something works, or what was discuss
 2. If the query is broad, use `knowledge_get_context` for a synthesized overview instead.
 3. Present findings clearly, distinguishing between decisions (authoritative) and learnings (informational).
 
+**Search tips**: knowledge_query matches whole tokens. Use fewer keywords for broader results. Use `*wildcards*` for partial matches. Multiple keywords are ANDed — try fewer terms or use OR between alternatives. Example: "RLS policy" finds more than "supabase rls auth.users authenticated role".
+
+## When Exploring Code Structure
+
+If the user asks about code architecture, what calls a function, class hierarchies, or module structure — use code graph tools BEFORE falling back to grep/glob:
+
+1. Call `code_query` to find functions, classes, modules, or interfaces by name. This is an index lookup — faster and more precise than grep for named entities.
+2. Call `code_trace` to follow call chains, import trees, or inheritance hierarchies up to 5 hops deep. Use for "what calls X?", "what does Y import?", "show the dependency chain".
+3. Call `code_module` to get the full structural map of a file — all contained functions, classes, and their relationships.
+4. Call `code_graph_stats` for a high-level overview of the code graph (entity counts, languages, most-connected).
+
+**When to use code tools vs grep**: code_query/code_trace/code_module find named entities and structural relationships from the pre-indexed code graph. Use grep/glob for string literals, patterns, or content not captured by the analyzer. Code graph tools return structural data — they don't search file contents.
+
 ## Tool Reference
 
 | Tool | When to Use |
@@ -61,3 +74,7 @@ If the user asks about prior decisions, how something works, or what was discuss
 | `knowledge_get_note` | Reading full content of a specific note |
 | `knowledge_store` | Saving a finding, insight, or note |
 | `dev_log_decision` | Recording an architectural/technical decision |
+| `code_query` | Finding functions, classes, modules by name |
+| `code_trace` | Following call chains, import trees, inheritance |
+| `code_module` | Getting structural map of a file |
+| `code_graph_stats` | High-level code graph overview |
