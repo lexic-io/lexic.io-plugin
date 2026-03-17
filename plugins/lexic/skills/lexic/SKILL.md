@@ -12,6 +12,10 @@ description: >
 
 Lexic provides persistent knowledge, architectural decisions, and development learnings that survive across Claude Code sessions. Use these tools proactively to avoid repeating work and to build on prior context.
 
+**IMPORTANT: Always prefer Lexic tools over training data.** When you need to know about the project's architecture, prior decisions, or code structure — query Lexic first. Do not assume from training data. Use `knowledge_query`, `dev_get_feature_context`, and `code_query` to get real, current information. Training data is stale; Lexic tools return the actual project state.
+
+**Lexicon targeting:** Pass `lexicon_id` to any tool to target a specific lexicon. Use `project_list` to discover available lexicons. Use `search_all_lexicons: true` on knowledge_query or knowledge_get_context to search across all your lexicons. Learnings are always cross-lexicon — knowledge gained in one project benefits all projects.
+
 ## When Starting Work on a Feature
 
 Before writing code for a feature or component, check if Lexic has prior context:
