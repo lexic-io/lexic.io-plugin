@@ -1,0 +1,30 @@
+{
+  "repo": "Lexic.io-plugin",
+  "extracted_at": "2026-03-17T16:00:46.912Z",
+  "stats": {
+    "files_scanned": 0,
+    "files_excluded": 0,
+    "nodes": 1,
+    "nodes_filtered": 0,
+    "edges": 0,
+    "warnings": 0,
+    "duration_ms": 12
+  },
+  "nodes": [
+    {
+      "stable_id": "n_8a7839842b323432",
+      "entity_type": "repo",
+      "name": "Lexic.io-plugin",
+      "source_ref": "C:\\source\\Lexic.io-plugin",
+      "raw_content": "Repository Lexic.io-plugin",
+      "content_hash": "63adc6d7c76e536546d8e5bc1477e91c7d90254ec267f93546b318019ba80e97",
+      "language": "",
+      "metadata": {
+        "repo_remote": null,
+        "repo_id": null
+      }
+    }
+  ],
+  "edges": [],
+  "warnings": []
+}
