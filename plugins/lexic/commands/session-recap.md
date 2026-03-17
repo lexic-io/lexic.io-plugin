@@ -65,7 +65,17 @@ The summary should follow this format:
 - {questions that need answers before next session}
 ```
 
-### 5. Report to user
+### 5. Close ad-hoc attribution session
+
+If any `knowledge_query` calls with `include_learnings: true` were made during this session, an ad-hoc attribution task may exist. Close it by calling `close_adhoc_session` with:
+- **output_summary**: The session summary text from step 4 (the full markdown content passed to `knowledge_store`)
+- **outcome**: `"success"` unless the session ended with unresolved failures, in which case `"failure"`
+
+This enables the learning attribution pipeline to score which served learnings were relevant to this session's work. Do NOT skip this step — it directly feeds the confidence system.
+
+If `close_adhoc_session` is not available as a tool, skip this step silently (the hourly cron will close it automatically with a weaker fallback summary).
+
+### 6. Report to user
 
 ```
 Session recap stored to Lexic.
