@@ -5,7 +5,10 @@ description: >
   Activate when: (1) starting work on a feature or component that may have prior context,
   (2) making an architectural or technical decision worth preserving,
   (3) discovering a gotcha, pattern, or insight that future tasks should know about,
-  (4) the user mentions "what did we decide", "how does X work", or references prior work.
+  (4) the user mentions "what did we decide", "how does X work", or references prior work,
+  (5) looking up a function, class, or module by name — use code_query instead of grep,
+  (6) tracing what calls a function, import chains, or dependency trees — use code_trace,
+  (7) understanding a file's structure before reading it — use code_module.
 ---
 
 # Lexic Knowledge Management

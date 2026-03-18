@@ -27,13 +27,20 @@ Execute ALL of the following phases sequentially. Do not skip any phase or stop 
 3. Read `.claude/skills/` for relevant skills
 4. Call `dev_get_feature_context` with the feature area name from `$ARGUMENTS`
 5. Call `knowledge_query` with keywords from the feature description (`include_learnings: true`)
+6. Call `code_query` with key entity names from the feature description to find existing implementations
+7. Call `code_trace` on critical entities to understand their dependency footprint (callers, callees, imports)
 
 ### Phase 2: Scope — map the feature to the codebase
 1. Identify codebase areas affected (UI, API, database, background jobs, etc.)
-2. Read the specific files that would need to change
-3. Read adjacent files to learn patterns (e.g., if adding a new page, read an existing page)
-4. Identify what needs to be created vs. modified
-5. Check for dependencies
+2. **Use `code_query` to find relevant functions, classes, and modules by name** — indexed lookup, faster than grep
+3. **Use `code_trace` to map call chains and dependency paths for affected entities** — pre-indexed relationships
+4. **Use `code_module` to understand file structure of files that need changes** — before reading source
+5. Read the specific files that would need to change
+6. Read adjacent files to learn patterns (e.g., if adding a new page, read an existing page)
+7. Identify what needs to be created vs. modified
+8. Check for dependencies
+
+**Code graph tools (code_query, code_trace, code_module) provide pre-indexed structural data. Use them BEFORE reading files — they reveal relationships (callers, callees, imports, inheritance) that file reads cannot. This is MANDATORY, not optional.**
 
 **Critical rule:** For every file listed in "Files to Modify" in the output, you must have READ that file. No exceptions.
 

@@ -76,6 +76,12 @@ This project uses [Lexic](https://lexic.io) for persistent knowledge across codi
 - Store as a learning: `workflow_learning_create` with category and context tags
 - Examples: framework quirks, deployment constraints, API rate limits, schema gotchas
 
+### When exploring code structure:
+- ALWAYS use `code_query` FIRST when looking up a function, class, or module by name — indexed lookup, faster than grep
+- ALWAYS use `code_trace` FIRST for "what calls X?", "what imports Y?", dependency chains — pre-indexed relationships
+- ALWAYS use `code_module` FIRST to understand a file's structure before reading it
+- Only fall back to grep/glob if code graph tools return no results, or for string literals/patterns
+
 ### Session workflow:
 - **Always start sessions** with `/lexic:start-session` to load recent decisions, active workflows, and learnings before doing any work
 - End sessions with `/lexic:session-recap` to capture what was done
