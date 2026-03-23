@@ -28,9 +28,10 @@ Use this when you've figured something out **outside** of a run and want future 
 
 5. Call `workflow_learning_create` with:
    - `content`: The learning, formatted clearly
-   - `feature`: The feature or component name
-   - `importance`: critical or useful
-   - `source`: "manual" (to distinguish from run-captured learnings)
+   - `feature_refs`: Array of feature or component names this relates to (e.g. `["billing", "oauth"]`)
+   - `category`: The type of learning (e.g. `gotcha`, `best_practice`, `security`, `general`)
+   - `context_tags`: Array of tags for context matching (e.g. `["supabase", "rls"]`)
+   - `confidence`: 1.0 for critical learnings, 0.5 for useful ones
 
 6. Confirm what was recorded.
 
