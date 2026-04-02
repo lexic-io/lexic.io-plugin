@@ -40,7 +40,7 @@ For each gotcha or learning, call `workflow_learning_create` with:
 ### 4. Store session summary
 
 Call `knowledge_store` with:
-- **title**: "Session Recap: {date} — {primary topic or work area}"
+- **title**: "{primary topic or work area} ({date})" — lead with the distinctive content, not a category prefix. The `session-recap` tag already classifies it; the title should maximize semantic distinctiveness for search and similarity.
 - **content**: Structured summary of the session
 - **tags**: ["session-recap", "{primary-area}"]
 

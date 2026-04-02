@@ -47,21 +47,29 @@ Active workflows:
 ### 4. Load recent learnings
 
 Call `knowledge_query` with:
-- **query**: the user's topic argument, or "recent learnings gotchas"
+- **query**: the user's topic argument if provided; otherwise derive a meaningful query from the project context (repo name from the working directory, key areas mentioned in CLAUDE.md, or recent git log subjects via `git log --oneline -5`)
 - **include_learnings**: true
-- **limit**: 5
+- **limit**: 10
 
-Present gotchas and learnings separately from decisions:
+Present learnings grouped by source:
 
 ```
-Recent learnings:
-  - EF Core: Lazy loading causes N+1 in our repository pattern — use .Include() explicitly
-  - Deploy: Azure slot swap requires connection string parity — learned the hard way
+Project learnings:
+  - {learning from this lexicon}
+  - ...
+
+Platform learnings:
+  - {cross-project learning relevant to the tools/patterns in use}
+  - ...
 ```
 
-### 5. Load topic context (if argument provided)
+If no learnings are returned, note this and move on — don't fabricate entries.
 
-If the user provided a topic argument, also call `dev_get_feature_context` with that topic to get deep context: all decisions, architecture notes, and recent activity related to that area.
+### 5. Load feature context
+
+If the user provided a topic argument, call `dev_get_feature_context` with that topic.
+
+If no topic argument was provided, call `dev_get_feature_context` with the project or repo name (e.g., from the working directory) to surface any decisions, architecture notes, and recent activity related to this project area.
 
 Present this as a focused context briefing.
 
