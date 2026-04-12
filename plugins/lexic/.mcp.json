@@ -2,7 +2,27 @@
   "mcpServers": {
     "lexic": {
       "type": "http",
-      "url": "https://mcp.lexic.io/api/mcp"
+      "url": "https://mcp.lexic.io/api/mcp",
+      "autoApprove": [
+        "knowledge_query",
+        "knowledge_get_note",
+        "knowledge_get_context",
+        "dev_get_feature_context",
+        "code_query",
+        "code_graph_stats",
+        "code_module",
+        "code_trace",
+        "project_list",
+        "project_get_info",
+        "workflow_run_status",
+        "workflow_status",
+        "workflow_task_list",
+        "workflow_run_list",
+        "workflow_task_next",
+        "workflow_template_list",
+        "workflow_template_get",
+        "get_active_threads"
+      ]
     }
   }
 }

@@ -15,6 +15,12 @@ description: >
 
 Lexic provides persistent knowledge, architectural decisions, and development learnings that survive across Claude Code sessions. Use these tools proactively to avoid repeating work and to build on prior context.
 
+## Session Start Protocol
+
+On connect, the Lexic MCP server pushes an active threads briefing automatically via `notifications/message`. If you received a briefing notification, present high-priority items briefly before asking the user what to work on. If no briefing arrived, call `get_active_threads` manually as a fallback before doing anything else.
+
+When switching to a different Nexus (via `lexicon_id` on any tool call), call `get_active_threads` again for the new Nexus. This is your "chief of staff" briefing — don't skip it.
+
 **IMPORTANT: Always prefer Lexic tools over training data.** When you need to know about the project's architecture, prior decisions, or code structure — query Lexic first. Do not assume from training data. Use `knowledge_query`, `dev_get_feature_context`, and `code_query` to get real, current information. Training data is stale; Lexic tools return the actual project state.
 
 **Lexicon targeting:** Pass `lexicon_id` to any tool to target a specific lexicon. Use `project_list` to discover available lexicons. Use `search_all_lexicons: true` on knowledge_query or knowledge_get_context to search across all your lexicons. Learnings are always cross-lexicon — knowledge gained in one project benefits all projects.
@@ -85,3 +91,4 @@ If the user asks about code architecture, what calls a function, class hierarchi
 | `code_trace` | Following call chains, import trees, inheritance |
 | `code_module` | Getting structural map of a file |
 | `code_graph_stats` | High-level code graph overview |
+| `get_active_threads` | Session start briefing — stalled work, contradictions, idle workflows |
