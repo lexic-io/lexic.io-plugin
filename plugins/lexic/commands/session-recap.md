@@ -75,7 +75,60 @@ This enables the learning attribution pipeline to score which served learnings w
 
 If `close_adhoc_session` is not available as a tool, skip this step silently (the hourly cron will close it automatically with a weaker fallback summary).
 
-### 6. Report to user
+### 6. Suggest governance promotion (Nexus-scoped only)
+
+Scan the decisions and learnings stored in steps 2–3 for normative phrasing — patterns like "always X", "never Y", "must Z", "from now on", "all future runs should". These are candidates for promotion to a process rule that will be enforced at every relevant gate phase, not just remembered as prose.
+
+For each match, ask the user:
+
+> "This sounds like a normative rule for `{nexus_name}`: '{matched text}'.
+> Promote to a process rule? (will run `rule_simulate` first to check for constitution conflicts)"
+
+If the user accepts:
+
+1. Resolve the active `lexicon_id` from the `<!-- lexic:integration -->` block in CLAUDE.md.
+2. Call `rule_simulate` with the proposed rule and the `lexicon_id` (always pass it — system-level promotion is operator-only and not accessible from this command).
+3. Present the simulation results (verdict, conflicts, replay outcomes).
+4. If the simulation passes, ask whether to proceed with `rule_promote` (also Nexus-scoped via `lexicon_id`).
+
+If no normative matches are found, skip silently. Do not invent rules to promote.
+
+### 7. Execute the check-in gesture
+
+After all knowledge has been stored, perform a source-control check-in for the session's code work. The "check-in gesture" is intentionally SCM-agnostic — detect the project's source control system and use the appropriate verb.
+
+**SCM detection (probe in order, first hit wins):**
+
+| Indicator | SCM | Distributed? | Check-in command |
+|---|---|---|---|
+| `.git/` | git | yes | `git add` + `git commit` |
+| `.hg/` | mercurial | yes | `hg commit` |
+| `.jj/` | jujutsu | yes | `jj commit` or `jj describe` |
+| `.fslckout` or `_FOSSIL_` | fossil | yes | `fossil commit` |
+| `.bzr/` | bazaar | yes | `bzr commit` |
+| `.svn/` | subversion | **no (centralized)** | `svn commit` |
+| `.p4config`, `P4CONFIG` env, or `.p4ignore` | perforce | **no (centralized)** | `p4 submit` |
+
+**If no SCM is detected:** skip with a one-line note ("No source control detected — skipping check-in gesture") and continue to step 8.
+
+**If a distributed SCM is detected:**
+
+1. Check working tree state (e.g., `git status` for git, `hg status` for hg). If clean, skip with "Working tree clean — nothing to check in."
+2. Stage the changes (the SCM-appropriate stage command — git uses explicit `git add <files>`; hg/jj/fossil/bzr stage implicitly).
+3. Draft a commit message from the "Work Completed" section of the step 4 summary. Format: 50-char subject + blank line + body. Do **not** include any AI/Claude attribution lines (per project convention).
+4. Show the user the staged diff summary and the draft message. Ask for confirmation before committing.
+5. On approval, perform the commit. **Do not push** — push is a separate, deliberate user action.
+6. If a pre-commit hook fails, **do not amend**. Report the failure, leave changes staged, ask the user to fix and re-run `/lexic:session-recap` (or commit manually).
+
+**If a centralized SCM is detected (svn, p4):**
+
+The check-in equivalent is immediately visible to other developers — treat as a shared-state mutation that always requires explicit confirmation. Same flow as distributed (steps 1–4), but make the confirmation prompt explicit about the visibility:
+
+> "This will commit to {svn|perforce} — changes will be immediately visible to all other developers on this depot/repo. Proceed?"
+
+Only on explicit user approval, perform the submit/commit.
+
+### 8. Report to user
 
 ```
 Session recap stored to Lexic.
@@ -83,6 +136,11 @@ Session recap stored to Lexic.
   Decisions logged: {count}
   Learnings stored: {count}
   Summary: stored as "{title}"
+
+  Governance promotions:
+  {count of rules promoted, or "None suggested" or "User declined"}
+
+  Check-in gesture: {SCM detected and commit hash, or "skipped — {reason}"}
 
   Unfinished work flagged:
   {list, or "None — clean session"}

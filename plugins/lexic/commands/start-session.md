@@ -73,7 +73,52 @@ If no topic argument was provided, call `dev_get_feature_context` with the proje
 
 Present this as a focused context briefing.
 
-### 6. Summary
+### 5b. Code graph status (skip for pure-knowledge Nexuses)
+
+Before any further code-related steps, determine whether code-graph tools apply:
+
+- If the working directory has a code stack (package manifest, `.git/`, etc.) AND `code_graph_stats` shows this lexicon's repo in `by_repo` → indexed; proceed normally.
+- If a code stack exists but the repo isn't in `by_repo` → unindexed; mention once in the summary, recommend triggering indexing.
+- If no code stack exists → pure-knowledge Nexus; **skip all code-graph calls in subsequent commands chained from this session**, and omit code-graph mentions from the summary.
+
+### 6. Surface Nexus governance state
+
+Pass the `lexicon_id` from Step 1 to all calls below. Never call these without `lexicon_id` — system-level governance is operator-only and not relevant to a session-start briefing.
+
+1. Call `knowledge_query` with `tags: ["constitution"]`, `limit: 3` to retrieve the active constitutional version metadata and any pending drafts.
+2. Call `knowledge_query` with `tags: ["sop", "rule"]`, `limit: 5` to surface active process rules and any pending `rule_simulate` results that haven't been promoted yet.
+
+Present in the summary as:
+
+```
+Nexus governance:
+  Active constitution: v{N} ({law_count} laws)
+  Drafts awaiting promotion: {count}
+  Active process rules: {count}
+  Rules simulated but not promoted: {count}
+```
+
+If any drafts or simulated-but-not-promoted rules exist, list their titles — these are stalled governance threads worth reviewing this session.
+
+`get_active_threads` is **already auto-called by the init hook** at session start; do not call it again here. If the briefing surfaced anything notable, mention it once in the summary instead of re-fetching.
+
+### 7. Auto-chain to prompt-engineer (when topic provided)
+
+If the user passed a topic argument and there is no active workflow run for it (check the active workflows from Step 3 against the topic):
+
+- Hand off to the `/lexic:prompt-engineer` flow with the topic as input. The user lands in a session with a ready-to-go implementation prompt rather than having to re-invoke a second command.
+- Tell the user: `"Topic '{topic}' had no active run. Auto-running /lexic:prompt-engineer..."` then proceed with that command's Phase 0 onward.
+
+If the user passed a topic AND an active workflow run already exists for it:
+
+- Surface the run, show its progress, and offer to resume via `/lexic:run {run_id}` instead of starting fresh.
+
+If no topic was provided:
+
+- Skip auto-chaining. Continue to the summary.
+- If `dev_get_feature_context` from Step 5 surfaced any stalled in-progress prompt-engineering threads (decisions referenced but with no implementation work tracked), call them out in the summary and offer to resume one.
+
+### 8. Summary
 
 Print a session-ready summary:
 
@@ -93,6 +138,8 @@ Session context loaded from Lexic.
   Ready to work. Lexic will be queried automatically before implementations
   that touch areas with prior decisions.
 ```
+
+If Step 7 auto-chained to `/lexic:prompt-engineer`, the prompt-engineer output replaces this summary — there is no need to print both.
 
 ## Design Intent
 

@@ -46,6 +46,15 @@ Criteria — adds tokens without value:
 - Overly verbose explanations of simple concepts
 - Information the model already knows (general framework docs)
 
+**E. Promote to Nexus governance (Constitutional law or process rule)**
+Criteria — hard normative rules that should be enforced at run-time, not just remembered:
+- "Always" / "never" / "must" rules tied to a specific feature area
+- Security or compliance invariants ("never log PII", "all writes require auth check")
+- Architectural absolutes ("all migrations must be reversible", "no direct fetch in components")
+- Rules already stated in CLAUDE.md but routinely violated by autonomous runs (signal that prose isn't enough)
+
+Promotion runs `rule_simulate` first to catch conflicts with the active constitution, then `rule_promote` if clean. **Always Nexus-scoped via `lexicon_id` from CLAUDE.md's integration block — this command never promotes to system-level governance, which is operator-only.**
+
 ### 3. Measure the token impact
 
 Estimate the current CLAUDE.md size in approximate tokens (rough: 1 token per 4 chars).
@@ -83,6 +92,14 @@ automatically when working in related areas.
 |---------|-------|----------------------|
 | {name} | {n} | /project:{command} — invoked when working on {area} |
 
+### Promote to Nexus governance ({count} sections)
+
+| Section | Lines | Suggested promotion |
+|---------|-------|---------------------|
+| {name} | {n} | Process rule for `{nexus_name}` (rule_simulate → rule_promote) |
+
+These are hard normative rules that should be enforced at runtime by the constitutional reasoner, not just remembered as prose in CLAUDE.md. Always Nexus-scoped — system-level governance is operator-only.
+
 ### Remove ({count} sections)
 
 | Section | Lines | Why |
@@ -103,8 +120,9 @@ Ask the user:
 "Would you like me to execute this optimization? I will:
 1. Store the 'Move to Lexic' sections as knowledge notes
 2. Create command files for the 'Convert to commands' sections
-3. Slim down CLAUDE.md to the 'Keep' sections only
-4. Keep a backup of the original CLAUDE.md as CLAUDE.md.backup
+3. For each 'Promote to governance' section: run `rule_simulate` (Nexus-scoped via lexicon_id) and, if clean, prompt you before calling `rule_promote`
+4. Slim down CLAUDE.md to the 'Keep' sections only
+5. Keep a backup of the original CLAUDE.md as CLAUDE.md.backup
 
 Or would you like to adjust the categorization first?"
 
@@ -115,8 +133,9 @@ If the user approves:
 1. **Backup**: Copy current CLAUDE.md to CLAUDE.md.backup
 2. **Store knowledge**: For each "Move to Lexic" section, call `knowledge_store` with appropriate title, content, and tags
 3. **Create commands**: For each "Convert to commands" section, create a `.claude/commands/{name}.md` file with the pattern/reference content
-4. **Rewrite CLAUDE.md**: Keep only Category A sections, plus the Lexic integration block
-5. **Verify**: Read back the new CLAUDE.md and confirm it's valid
+4. **Promote governance**: For each "Promote to governance" section, resolve `lexicon_id` from CLAUDE.md's `<!-- lexic:integration -->` block, call `rule_simulate` with the rule and `lexicon_id`, present results, and on user approval call `rule_promote` (also Nexus-scoped). Skip any section that fails simulation; leave it in CLAUDE.md and report the conflict.
+5. **Rewrite CLAUDE.md**: Keep only Category A sections, plus the Lexic integration block
+6. **Verify**: Read back the new CLAUDE.md and confirm it's valid
 
 ## Design Intent
 

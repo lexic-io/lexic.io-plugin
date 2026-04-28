@@ -58,6 +58,24 @@ Decision logged to Lexic.
   This will surface automatically in future sessions when working on {area}.
 ```
 
+### 5. Suggest governance promotion (Nexus-scoped only)
+
+Check whether the decision is normative — phrasing like "always", "never", "must", "from now on", or a clear binding rule that future runs should follow without re-litigation.
+
+If it is, ask the user:
+
+> "This decision reads as a normative rule for `{nexus_name}`: '{decision}'.
+> Promote to a process rule? (will run `rule_simulate` first to check for constitution conflicts)"
+
+If the user accepts:
+
+1. Resolve the active `lexicon_id` from the `<!-- lexic:integration -->` block in CLAUDE.md.
+2. Call `rule_simulate` with the proposed rule and `lexicon_id` (always pass it — this command never targets system-level governance, which is operator-only).
+3. Present the simulation verdict and any conflicts.
+4. If clean, ask whether to call `rule_promote` (also Nexus-scoped via `lexicon_id`).
+
+If the decision is one-off (a project-specific choice without normative weight), skip the promotion suggestion silently.
+
 ## Examples
 
 **Input**: "Use Tailwind instead of CSS modules for styling"

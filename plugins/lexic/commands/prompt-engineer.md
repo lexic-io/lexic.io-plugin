@@ -20,27 +20,39 @@ Execute ALL of the following phases sequentially. Do not skip any phase or stop 
 ### Phase 0: Load project customizations
 1. Read `.lexic/prompt-engineer.md` if it exists — treat its contents as additional mandatory rules
 2. If it does not exist, proceed with the generic process below
+3. Resolve the active Nexus: read `CLAUDE.md` for the `<!-- lexic:integration -->` block and extract `lexicon_id`. Record it for all subsequent Lexic calls. If no integration block exists, tell the user to run `/lexic:setup` first and stop.
 
 ### Phase 1: Discover — understand what exists
 1. Read `CLAUDE.md` for decisions, architecture, anti-patterns
 2. Read `.claude/prompts/` directory listing to learn existing format and calibrate specificity
 3. Read `.claude/skills/` for relevant skills
-4. Call `dev_get_feature_context` with the feature area name from `$ARGUMENTS`
-5. Call `knowledge_query` with keywords from the feature description (`include_learnings: true`)
-6. Call `code_query` with key entity names from the feature description to find existing implementations
-7. Call `code_trace` on critical entities to understand their dependency footprint (callers, callees, imports)
+4. Call `code_graph_stats` as a sanity check, then branch on three states:
+   - **State 1 — indexed for this Nexus's repo**: `total_entities > 0` and this lexicon's repo is in `by_repo`. Proceed silently to the remaining Phase 1 steps.
+   - **State 2 — codebase exists but not indexed**: `total_entities` is 0 or this repo isn't in `by_repo`, but the working directory has a code stack (package manifest, `.git/`, etc.). **Warn the user explicitly** that the code graph hasn't been built — `code_query`/`code_trace`/`code_module`/`code_pattern`/`code_orphan_consumers` will return nothing, and the prompt's structural reconnaissance will be weaker than usual. Recommend triggering indexing from the Lexic dashboard before continuing, but proceed if the user opts to.
+   - **State 3 — no code association**: working directory has no code stack and the Nexus is pure-knowledge. **Skip steps 8, 9, and 10 entirely** (no `code_query`, no `code_trace`, no `code_pattern`). The generated prompt will be prose-only — that's correct for this Nexus type. Do not warn.
+5. Call `dev_get_feature_context` with the feature area name from `$ARGUMENTS`
+6. Call `knowledge_query` with keywords from the feature description (`include_learnings: true`)
+7. **Load Nexus governance** for the feature area (Nexus-scoped via the lexicon_id from Phase 0):
+   - `knowledge_query` with `tags: ["constitution", "law"]` and the feature keywords — surfaces active constitutional laws relevant to this work
+   - `knowledge_query` with `tags: ["sop", "rule"]` and the feature keywords — surfaces active process rules
+   - These results will be injected into the generated prompt's "What NOT to do" / "Architecture Context" / "Known Issues" sections in Phase 4
+8. Call `code_query` with key entity names from the feature description to find existing implementations
+9. Call `code_trace` on critical entities to understand their dependency footprint (callers, callees, imports)
+10. Call `code_pattern` if the feature involves repeating a structural pattern (e.g., "find all RLS policies that join lexicon_members") — this is more reliable than grep for AST-shaped queries
 
 ### Phase 2: Scope — map the feature to the codebase
 1. Identify codebase areas affected (UI, API, database, background jobs, etc.)
 2. **Use `code_query` to find relevant functions, classes, and modules by name** — indexed lookup, faster than grep
 3. **Use `code_trace` to map call chains and dependency paths for affected entities** — pre-indexed relationships
 4. **Use `code_module` to understand file structure of files that need changes** — before reading source
-5. Read the specific files that would need to change
-6. Read adjacent files to learn patterns (e.g., if adding a new page, read an existing page)
-7. Identify what needs to be created vs. modified
-8. Check for dependencies
+5. **Use `code_pattern` for AST-shaped pattern queries** when looking for all instances of a structural pattern (signatures, call shapes, decorators, etc.)
+6. **Use `code_orphan_consumers` BEFORE specifying any task that removes or renames a function/class/module** — verifies what depends on it. If consumers exist, the task must include updating them.
+7. Read the specific files that would need to change
+8. Read adjacent files to learn patterns (e.g., if adding a new page, read an existing page)
+9. Identify what needs to be created vs. modified
+10. Check for dependencies
 
-**Code graph tools (code_query, code_trace, code_module) provide pre-indexed structural data. Use them BEFORE reading files — they reveal relationships (callers, callees, imports, inheritance) that file reads cannot. This is MANDATORY, not optional.**
+**Code graph tools (code_query, code_trace, code_module, code_pattern, code_orphan_consumers) provide pre-indexed structural data. Use them BEFORE reading files — they reveal relationships (callers, callees, imports, inheritance) that file reads cannot. This is MANDATORY when the Nexus has indexed code (state 1 from Phase 1 step 4); skip silently for state 3 pure-knowledge Nexuses.**
 
 **Critical rule:** For every file listed in "Files to Modify" in the output, you must have READ that file. No exceptions.
 
@@ -67,6 +79,8 @@ Verify before producing output:
 - Each acceptance criterion is testable without human judgment
 - No task says "figure out" or "decide"
 - All mandatory guardrails from `.lexic/prompt-engineer.md` are included
+- All Nexus governance (constitutional laws + process rules) loaded in Phase 1 step 7 are reflected in the prompt's "What NOT to do" or "Architecture Context"
+- Any task that removes/renames a code entity ran `code_orphan_consumers` and either has no consumers or includes a task to update them
 - Build/type check reminder included if code changes are involved
 
 ## Step 3: Present the result

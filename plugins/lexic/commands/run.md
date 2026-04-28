@@ -59,13 +59,23 @@ Determine whether you are resuming an existing run or creating a new one:
 ## Phase 1: Preflight
 
 1. Call `workflow_run_estimate` with the run_id to show the estimated credit cost.
-2. Report to the user in a clear table or bullet list:
+2. **Surface Nexus governance** that will apply during the run (always pass `lexicon_id` — system-level governance is not relevant here):
+   - `knowledge_query` with `tags: ["constitution"]`, `limit: 3` — get active constitution version + law count.
+   - `knowledge_query` with `tags: ["sop", "rule"]`, `limit: 5` — get active process rules count.
+3. **Code graph readiness check** (three-state branch):
+   - If the working directory has a code stack AND `code_graph_stats` shows this lexicon's repo in `by_repo` → indexed; proceed silently.
+   - If a code stack exists but the repo isn't in `by_repo` → **warn**: "Code graph not built for this Nexus's repo — task context will be thin (no callers/callees/imports). Recommend triggering indexing before running, but you can proceed."
+   - If no code stack exists → pure-knowledge Nexus; skip silently (the run will be prose-only by design).
+4. Report to the user in a clear table or bullet list:
    - Run name, status, and task counts (total / completed / failed)
    - **Task count** and **credits per task (avg)**
    - **Total estimated credits** (the number, not just a percentage)
    - **Current word balance** and **balance after** the run completes
    - **Budget impact** as both the number of words consumed AND the percentage of current balance
-3. Ask the user to confirm before starting the execution loop.
+   - **Active constitution**: v{N} with {law_count} laws
+   - **Active process rules**: {count}
+   - **Code graph readiness**: indexed / unindexed / not-applicable (per step 3)
+5. Ask the user to confirm before starting the execution loop.
 
 ## Phase 2: Execution Loop
 

@@ -35,6 +35,9 @@ Analyze the project to understand the tech stack. Check for:
 - `go.mod` (Go)
 - `force-app/` or `sfdx-project.json` (Salesforce)
 - `Gemfile` (Ruby)
+- `pom.xml` or `build.gradle` / `build.gradle.kts` (Java / Kotlin / JVM)
+- `mix.exs` (Elixir)
+- `Package.swift` (Swift)
 
 Also check for:
 - `.git/` — is this a git repo?
@@ -80,7 +83,15 @@ This project uses [Lexic](https://lexic.io) for persistent knowledge across codi
 - ALWAYS use `code_query` FIRST when looking up a function, class, or module by name — indexed lookup, faster than grep
 - ALWAYS use `code_trace` FIRST for "what calls X?", "what imports Y?", dependency chains — pre-indexed relationships
 - ALWAYS use `code_module` FIRST to understand a file's structure before reading it
+- Use `code_pattern` for AST-pattern queries across the codebase (e.g., "all functions matching this signature shape")
+- Use `code_orphan_consumers` BEFORE removing a function/class/module — verifies nothing depends on it
+- Use `code_graph_stats` for a top-level overview of the codebase (entity counts, most-connected entities)
 - Only fall back to grep/glob if code graph tools return no results, or for string literals/patterns
+
+### Governance (constitution + process rules):
+- This Nexus has its own governance. System-level governance is operator-only and never accessible from these commands.
+- Before adding a new normative rule, run `rule_simulate` against the active constitution to catch conflicts (Nexus-scoped via lexicon_id)
+- Use `/lexic:decide` for one-off decisions; consider promoting recurring "always/never" decisions to a process rule via `rule_simulate` → `rule_promote`
 
 ### Session workflow:
 - **Always start sessions** with `/lexic:start-session` to load recent decisions, active workflows, and learnings before doing any work
@@ -192,12 +203,21 @@ Call `knowledge_store` with:
 
 This creates a knowledge anchor so future sessions know when and how the project was configured.
 
-### 9. Verify the MCP connection
+### 9. Verify the MCP connection and code graph status
 
 Call `knowledge_query` with the search term "setup" to verify the Lexic MCP tools are accessible and the lexicon is reachable.
 
 - **If successful**: Report success to the user
 - **If failed**: Report the error and suggest checking their MCP server configuration
+
+Then determine whether code-graph guidance applies to this Nexus by branching on the stack detection from Step 3:
+
+- **If a stack was detected** (state 2 or 3 below applies): call `code_graph_stats` and check `by_repo` for this project.
+  - **State 1 — indexed**: `total_entities > 0` and this repo appears in `by_repo`. Report "Code graph indexed — code_query/code_trace/code_module ready."
+  - **State 2 — codebase exists but not indexed**: `total_entities` is 0 or this repo isn't in `by_repo`, but a stack was detected in Step 3. Tell the user "Code graph not yet built for this repo. The structural code tools (code_query, code_trace, code_module, code_pattern, code_orphan_consumers) won't return results until the analyzer runs. Trigger indexing from the Lexic dashboard for this Nexus."
+- **State 3 — no code association**: no stack was detected in Step 3 (no package manifest, no `.git/`, working directory is purely prose/config/research). **Skip the code-graph check entirely. Do not warn. Do not recommend indexing.** This is a pure-knowledge Nexus and code-graph tools simply don't apply.
+
+If state 3 applies, also **omit the "When exploring code structure" section** from the integration block written in Step 5 — that guidance is meaningless here and would mislead future sessions.
 
 ### 10. Report to the user
 
@@ -214,11 +234,20 @@ Lexic setup complete.
   .lexic/prompt-engineer.md:    {created / already exists}
 
   Available commands:
-    /lexic:start-session       Load recent decisions + active context
+    /lexic:start-session       Load recent decisions + active context (auto-chains to prompt-engineer when given a topic)
+    /lexic:session-recap       Summarize, store learnings, and execute the project's check-in gesture
     /lexic:prompt-engineer     Generate implementation prompts from feature descriptions
-    /lexic:log-decision        Record an architectural decision
+    /lexic:run                 Execute an autonomous coding run from a prompt or run-id
+    /lexic:status              Show active workflows, runs, and Nexus governance state
+    /lexic:context             Load context for a specific feature or topic
     /lexic:what-do-we-know     Query everything Lexic knows about a topic
-    /lexic:session-recap       Summarize and store session learnings
+    /lexic:search              Search notes, decisions, and learnings (also code entities)
+    /lexic:save                Save a finding or note
+    /lexic:learn               Record a learning that will be served to future runs
+    /lexic:decide              Record an architectural or implementation decision
+    /lexic:block-on-human      Pause an in-flight task waiting on a human action
+    /lexic:resume-task         Resume a task that was blocked on human action
+    /lexic:template            Browse, create, or use workflow templates
     /lexic:optimize-claude-md  Analyze CLAUDE.md for improvement opportunities
 
   Customize prompt generation by editing .lexic/prompt-engineer.md

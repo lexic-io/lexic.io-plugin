@@ -33,6 +33,20 @@ Call `knowledge_query` with:
 - **query**: "{topic} gotcha OR issue OR problem OR constraint OR limitation"
 - **limit**: 5
 
+### 4b. Surface Nexus governance for the topic
+
+Always pass `lexicon_id` from CLAUDE.md's `<!-- lexic:integration -->` block — this command never queries system-level governance.
+
+- `knowledge_query` with `tags: ["constitution", "law"]`, query `{topic}`, `limit: 5` — surfaces active constitutional laws governing this feature area.
+- `knowledge_query` with `tags: ["sop", "rule"]`, query `{topic}`, `limit: 5` — surfaces active process rules.
+
+### 4c. Surface code entities for the topic (skip if no-code Nexus)
+
+Three-state branch:
+- **Indexed for this Nexus's repo**: call `code_query` with `{topic}` (limit 10) and `code_module` on the top result's parent module. Include the entities in the briefing.
+- **Code stack exists but not indexed**: include a one-line note in the briefing ("Code graph not indexed — structural data unavailable for this topic").
+- **No-code Nexus**: skip silently; do not mention code-graph at all.
+
 ### 5. Present organized results
 
 Format the results into a structured briefing:
@@ -51,6 +65,16 @@ Format the results into a structured briefing:
 ### Architecture Notes ({count})
 {Relevant architecture documentation and design notes}
 
+### Active Governance ({count})
+{Constitutional laws and process rules governing this topic, from step 4b}
+
+- {law/rule title} — {scope and binding behavior}
+
+### Code Entities ({count}) {omit this section entirely for no-code Nexuses}
+{Functions, classes, modules from step 4c}
+
+- {entity_type}: {name} ({file_path}:{line}) — {connection_count} connections
+
 ### Learnings & Gotchas ({count})
 {Things discovered through experience}
 
@@ -61,7 +85,7 @@ Format the results into a structured briefing:
 
 ### Gaps
 {If any of the above sections returned zero results, note it:}
-- No decisions recorded for {topic} — consider logging key choices with /lexic:log-decision
+- No decisions recorded for {topic} — consider logging key choices with /lexic:decide
 - No learnings recorded — this area hasn't hit any documented gotchas yet
 ```
 
@@ -70,7 +94,7 @@ Format the results into a structured briefing:
 Based on the results:
 
 - **If rich context exists**: "This topic is well-documented. The key decisions to respect are: {list top 3}"
-- **If sparse**: "Not much recorded here yet. As you work on {topic}, consider logging decisions with `/lexic:log-decision` so future sessions have context."
+- **If sparse**: "Not much recorded here yet. As you work on {topic}, consider logging decisions with `/lexic:decide` so future sessions have context."
 - **If contradictions found**: "There may be conflicting information — {describe conflict}. Consider resolving this with a new decision."
 
 ## Design Intent
