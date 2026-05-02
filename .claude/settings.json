@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_lexic__knowledge_query",
+      "mcp__claude_ai_lexic__workflow_run_list",
+      "mcp__claude_ai_lexic__dev_get_feature_context"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__.*supabase.*execute_sql",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-destructive-sql.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
