@@ -9,6 +9,31 @@ Generate a detailed, structured implementation prompt from a high-level feature 
 
 **IMPORTANT: You MUST complete ALL phases and steps below in a single response without stopping or asking for confirmation between phases. The user expects to see the final prompt and next-step options. Only stop early if $ARGUMENTS is empty (Step 1).**
 
+## Evidence Discipline (foundational — applies to every claim in a generated spec)
+
+**Ungrounded and unverified data is not actionable or usable. Claims require verifiable and provable data points.**
+
+This is foundational, not a checklist item to satisfy later. A spec that says "X exists", "Y is empty", or "Z always returns N" must carry an evidence citation that lets the reader independently re-verify the claim. No exceptions for confidence, urgency, or apparent obviousness.
+
+**Evidence priority order:**
+
+1. **Live data probe** — a data query (with timestamp) whose result is reproduced in the spec. Required for any claim about record counts, field distributions, presence or absence of records, or "what value does field X actually contain." The probe mechanism depends on the data source — SQL query, NoSQL query, REST/GraphQL API call, log query, analytics event count, filesystem inspection, or equivalent — but the requirement (reproducible, re-verifiable result with a timestamp) is the same regardless of store.
+2. **Code citation with file:line** — required for any claim about what code does, what calls what, or what a function returns. The reader must be able to navigate to that exact location and verify.
+3. **Read-back of an authoritative artifact** — migration file content, generated type file, OpenAPI/JSON schema, RLS policy definition. Cite path + line range.
+4. **Memory note or prior-agent assertion** — weakest form of evidence. Acceptable for procedural guidance ("how we handle X") but **NOT acceptable for data-shape claims** (record counts, field values, distribution patterns). Memory drifts; treat memory-served claims as hypotheses to verify, not as ground truth.
+
+**Required pre-spec verification for these claim types:**
+
+- **"This filter excludes X"** -> probe the actual values in that field and cite the result before recommending the filter.
+- **"There are N records that..."** -> run the count query against the data store and cite the timestamp.
+- **"Field Y has value Z by default"** -> query the authoritative metadata for the data store in question (schema introspection, type definitions, etc.) for the actual default, OR read the canonical artifact that set it. Do not infer from code defaults.
+- **"This is dead code / never executes"** -> trace callers AND cite a code path or runtime check that proves the branch can never fire.
+- **"The existing pattern is X"** -> cite at least 2 file:line examples of that pattern actually in use. One example is anecdote; two is a pattern.
+
+**The lesson**: when a spec contains a filter or count claim that names a specific field value, the minimum discovery work is to query the actual values in that field. Memory notes and code patterns are starting points for hypotheses, not substitutes for verification. Accept the few-second cost of probing; the cost of not probing is shipping bugs into the implementation chain where they cost orders of magnitude more to catch.
+
+Project-local `.lexic/prompt-engineer.md` files may include concrete failure-mode examples specific to that project's data shape.
+
 ## Step 1: Validate input
 
 If `$ARGUMENTS` is empty, ask the user to describe the feature they want to implement. A good description includes what the feature does and why it matters. **Stop here ONLY if input is missing.**
@@ -82,6 +107,7 @@ Verify before producing output:
 - All Nexus governance (constitutional laws + process rules) loaded in Phase 1 step 7 are reflected in the prompt's "What NOT to do" or "Architecture Context"
 - Any task that removes/renames a code entity ran `code_orphan_consumers` and either has no consumers or includes a task to update them
 - Build/type check reminder included if code changes are involved
+- Every quantitative claim has an evidence citation: no claim of the form "there are N records", "field X has value Y", "filter Z excludes population W", "this branch never fires", or "this is unused" appears without either a probe-result reproduction or a code-citation that proves it. Memory notes do not satisfy this gate.
 
 ## Step 3: Present the result
 

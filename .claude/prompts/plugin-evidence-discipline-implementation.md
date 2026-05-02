@@ -77,20 +77,20 @@ This is foundational, not a checklist item to satisfy later. A spec that says "X
 
 **Evidence priority order:**
 
-1. **Live data probe** — a query (with timestamp) whose result is reproduced in the spec. Required for any claim about row counts, column distributions, presence/absence of records, or "what value does column X actually contain." Substitute "API call", "filesystem inspection", or equivalent for non-database data sources.
+1. **Live data probe** — a data query (with timestamp) whose result is reproduced in the spec. Required for any claim about record counts, field distributions, presence or absence of records, or "what value does field X actually contain." The probe mechanism depends on the data source — SQL query, NoSQL query, REST/GraphQL API call, log query, analytics event count, filesystem inspection, or equivalent — but the requirement (reproducible, re-verifiable result with a timestamp) is the same regardless of store.
 2. **Code citation with file:line** — required for any claim about what code does, what calls what, or what a function returns. The reader must be able to navigate to that exact location and verify.
 3. **Read-back of an authoritative artifact** — migration file content, generated type file, OpenAPI/JSON schema, RLS policy definition. Cite path + line range.
-4. **Memory note or prior-agent assertion** — weakest form of evidence. Acceptable for procedural guidance ("how we handle X") but **NOT acceptable for data-shape claims** (row counts, column values, distribution patterns). Memory drifts; treat memory-served claims as hypotheses to verify, not as ground truth.
+4. **Memory note or prior-agent assertion** — weakest form of evidence. Acceptable for procedural guidance ("how we handle X") but **NOT acceptable for data-shape claims** (record counts, field values, distribution patterns). Memory drifts; treat memory-served claims as hypotheses to verify, not as ground truth.
 
 **Required pre-spec verification for these claim types:**
 
-- **"This filter excludes X"** -> probe the actual values in that column and cite the result before recommending the filter.
-- **"There are N rows that..."** -> run the count query and cite the timestamp.
-- **"Column Y has value Z by default"** -> query authoritative metadata (e.g., `information_schema.columns` for SQL stores) for the actual default, OR read the canonical artifact that set it. Do not infer from code defaults.
+- **"This filter excludes X"** -> probe the actual values in that field and cite the result before recommending the filter.
+- **"There are N records that..."** -> run the count query against the data store and cite the timestamp.
+- **"Field Y has value Z by default"** -> query the authoritative metadata for the data store in question (schema introspection, type definitions, etc.) for the actual default, OR read the canonical artifact that set it. Do not infer from code defaults.
 - **"This is dead code / never executes"** -> trace callers AND cite a code path or runtime check that proves the branch can never fire.
 - **"The existing pattern is X"** -> cite at least 2 file:line examples of that pattern actually in use. One example is anecdote; two is a pattern.
 
-**The lesson**: when a spec contains a filter or count claim that names a specific column value, the minimum discovery work is to query the actual values in that column. Memory notes and code patterns are starting points for hypotheses, not substitutes for verification. Accept the few-second cost of probing; the cost of not probing is shipping bugs into the implementation chain where they cost orders of magnitude more to catch.
+**The lesson**: when a spec contains a filter or count claim that names a specific field value, the minimum discovery work is to query the actual values in that field. Memory notes and code patterns are starting points for hypotheses, not substitutes for verification. Accept the few-second cost of probing; the cost of not probing is shipping bugs into the implementation chain where they cost orders of magnitude more to catch.
 
 Project-local `.lexic/prompt-engineer.md` files may include concrete failure-mode examples specific to that project's data shape.
 ```
@@ -107,7 +107,7 @@ Project-local `.lexic/prompt-engineer.md` files may include concrete failure-mod
 **What to do**: In Phase 5: Validate (the bullet list at lines 74-84), append a new bullet at the end of the list:
 
 ```markdown
-- Every quantitative claim has an evidence citation: no claim of the form "there are N rows", "column X has value Y", "filter Z excludes population W", "this branch never fires", or "this is unused" appears without either a probe-result reproduction or a code-citation that proves it. Memory notes do not satisfy this gate.
+- Every quantitative claim has an evidence citation: no claim of the form "there are N records", "field X has value Y", "filter Z excludes population W", "this branch never fires", or "this is unused" appears without either a probe-result reproduction or a code-citation that proves it. Memory notes do not satisfy this gate.
 ```
 
 **Acceptance criteria**:
@@ -124,12 +124,14 @@ Project-local `.lexic/prompt-engineer.md` files may include concrete failure-mod
    - New Evidence Discipline section is between the intro and Step 1.
    - Phase 5 list has the new bullet at the end.
    - All other phases, validation gates, output template, and Step 3/4 sections are unchanged.
-2. Bump `plugins/lexic/.claude-plugin/plugin.json` patch version if a version field exists.
-3. If the plugin repo has a test or lint pass, run it and confirm 0 failures.
-4. Optionally trigger `/lexic:prompt-engineer` against a sandbox project to confirm the new section is loaded.
+2. **Project-leakage check** — grep the modified `plugins/lexic/commands/prompt-engineer.md` for project-specific terms that must not appear in the platform skill. The grep must return zero matches for each of: `Lexico`, `Lexic.io` (the product, distinct from the plugin/Nexus terminology that legitimately appears), `Spec 10b`, `actor_type`, `.neq(`, `consumeWordsForLexicon`, `lib/i18n/strings`. If any match surfaces, the abstraction has leaked — remove the offending content before proceeding. Also verify case-insensitively for any other obviously project-coupled term (table names, column names, internal feature codenames) introduced during editing.
+3. Bump `plugins/lexic/.claude-plugin/plugin.json` patch version if a version field exists.
+4. If the plugin repo has a test or lint pass, run it and confirm 0 failures.
+5. Optionally trigger `/lexic:prompt-engineer` against a sandbox project to confirm the new section is loaded.
 
 **Acceptance criteria**:
 - [ ] File diff shows additions only — no deletions or modifications outside the two insertion points.
+- [ ] Project-leakage grep returns zero matches for each named term.
 - [ ] Plugin tests/lint (if any) pass.
 - [ ] Live invocation surfaces the new content.
 
